@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tokla Tea Estate — Visit &amp; Weather</title>
+<style>
+/* ==========================================================================
+   Tokla Tea Estate — single-file build
+   Palette: tea-leaf green, brewed-amber liquor, parchment paper.
+   ========================================================================== */
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Work+Sans:wght@400;500;600&display=swap');
+
+:root {
+  --ink:#1B2A22; --leaf:#33513E; --leaf-dim:#26382D;
+  --parchment:#EFE9D8; --parchment-2:#E4DCC5;
+  --amber:#AD7A2C; --amber-dim:#8F6423; --moss:#7C9473;
+  --line:#C9BFA3; --white:#FBF9F2;
+  --font-display:'Fraunces', Georgia, serif;
+  --font-body:'Work Sans', -apple-system, sans-serif;
+  --radius:3px; --max-w:1120px;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin:0; background:var(--parchment); color:var(--ink); font-family:var(--font-body); font-size:17px; line-height:1.6; }
+img { max-width:100%; display:block; }
+a { color: inherit; }
+.wrap { max-width:var(--max-w); margin:0 auto; padding:0 1.75rem; }
+h1,h2,h3 { font-family:var(--font-display); font-weight:600; line-height:1.08; margin:0 0 0.5em; letter-spacing:-0.01em; }
+h1 { font-size:clamp(2.4rem,5vw,4.75rem); font-weight:500; }
+h2 { font-size:clamp(1.7rem,3.4vw,2.5rem); }
+h3 { font-size:1.25rem; }
+p { max-width:62ch; }
+.lede { font-size:1.2rem; color:var(--leaf-dim); max-width:46ch; }
+
+.btn { display:inline-flex; align-items:center; gap:.5rem; font-family:var(--font-body); font-weight:600; font-size:.98rem; padding:.85rem 1.6rem; border-radius:var(--radius); border:1px solid transparent; cursor:pointer; text-decoration:none; transition:background-color 150ms ease, transform 150ms ease; background:none; }
+.btn-primary { background:var(--amber); color:var(--white); }
+.btn-primary:hover { background:var(--amber-dim); }
+.btn-primary:active { transform:translateY(1px); }
+.btn-ghost { background:transparent; border-color:var(--leaf); color:var(--leaf); }
+.btn-ghost:hover { background:var(--leaf); color:var(--white); }
+
+.site-nav { background:var(--leaf); color:var(--white); }
+.site-nav .wrap { display:flex; align-items:center; justify-content:space-between; padding:1.1rem 1.75rem; }
+.wordmark { font-family:var(--font-display); font-size:1.35rem; font-weight:600; text-decoration:none; color:var(--white); cursor:pointer; }
+.wordmark span { color:var(--moss); }
+.site-nav nav a { color:var(--parchment); text-decoration:none; font-size:.95rem; margin-left:1.75rem; border-bottom:1px solid transparent; padding-bottom:2px; cursor:pointer; }
+.site-nav nav a:hover, .site-nav nav a.active { border-color:var(--moss); }
+
+.hero { padding:clamp(3rem,7vw,6rem) 0 clamp(2.5rem,6vw,4.5rem); }
+.hero .wrap { display:grid; grid-template-columns:1.5fr 1fr; gap:3rem; align-items:center; }
+.hero-copy .kicker { color:var(--moss); font-weight:600; margin-bottom:.6rem; font-size:.95rem; }
+.hero-copy .cta-row { margin-top:1.75rem; display:flex; gap:1rem; flex-wrap:wrap; }
+
+.field-report { background:var(--white); border:1px solid var(--line); border-radius:var(--radius); padding:1.6rem 1.6rem 1.4rem; transform:rotate(-1.4deg); box-shadow:0 18px 34px -22px rgba(27,42,34,.45); position:relative; }
+.field-report::before { content:"Today at the estate"; position:absolute; top:-.75rem; left:1.4rem; background:var(--amber); color:var(--white); font-size:.78rem; font-weight:600; padding:.25rem .7rem; border-radius:var(--radius); }
+.fr-temp { display:flex; align-items:baseline; gap:.5rem; margin-top:.6rem; }
+.fr-temp .num { font-family:var(--font-display); font-size:3.2rem; font-weight:500; color:var(--leaf); }
+.fr-cond { color:var(--ink); font-weight:500; }
+.fr-meta { display:flex; gap:1.25rem; margin-top:.9rem; padding-top:.9rem; border-top:1px dashed var(--line); font-size:.88rem; color:var(--leaf-dim); }
+.fr-meta div strong { display:block; color:var(--ink); font-size:1rem; }
+.fr-status { margin-top:1rem; font-size:.9rem; color:var(--moss); }
+.fr-loading, .fr-error { color:var(--leaf-dim); font-style:italic; }
+
+section { padding:clamp(2.5rem,6vw,4.5rem) 0; }
+.section-alt { background:var(--parchment-2); }
+.section-dark { background:var(--leaf); color:var(--parchment); }
+.section-dark h2 { color:var(--white); }
+.section-dark .lede { color:var(--parchment); opacity:.85; }
+.two-col { display:grid; grid-template-columns:1fr 1fr; gap:3rem; align-items:start; }
+
+.route-list { list-style:none; margin:2rem 0 0; padding:0; counter-reset:stop; }
+.route-list li { counter-increment:stop; display:grid; grid-template-columns:2.5rem 1fr; gap:1rem; padding:1.1rem 0; border-bottom:1px solid var(--line); }
+.route-list li:first-child { border-top:1px solid var(--line); }
+.route-list li::before { content:counter(stop); font-family:var(--font-display); font-size:1.4rem; color:var(--amber); }
+.route-list h3 { margin-bottom:.15rem; }
+.route-list p { margin:0; color:var(--leaf-dim); font-size:.95rem; }
+
+.forecast-strip { display:grid; grid-template-columns:repeat(3,1fr); gap:1rem; margin-top:1.5rem; }
+.forecast-day { background:var(--white); border:1px solid var(--line); border-radius:var(--radius); padding:1.1rem; text-align:left; }
+.forecast-day .d-label { font-weight:600; color:var(--leaf); }
+.forecast-day .d-temp { font-family:var(--font-display); font-size:1.6rem; margin:.3rem 0; }
+.forecast-day .d-note { font-size:.85rem; color:var(--leaf-dim); }
+.forecast-day.best { border-color:var(--amber); background:#FFF8EC; }
+.forecast-day.best .d-label::after { content:" — best day"; color:var(--amber); font-weight:500; }
+
+form { max-width:480px; }
+.field { margin-bottom:1.3rem; }
+.field label { display:block; font-weight:600; font-size:.92rem; margin-bottom:.4rem; color:var(--leaf-dim); }
+.field input, .field select { width:100%; padding:.75rem .9rem; border:1px solid var(--line); border-radius:var(--radius); background:var(--white); font-family:var(--font-body); font-size:1rem; color:var(--ink); }
+.field input:focus, .field select:focus { outline:2px solid var(--amber); outline-offset:1px; border-color:var(--amber); }
+.field-error { color:#A5432B; font-size:.85rem; margin-top:.35rem; display:none; }
+.field.has-error input, .field.has-error select { border-color:#A5432B; }
+.field.has-error .field-error { display:block; }
+.form-note { font-size:.85rem; color:var(--leaf-dim); margin-top:-.4rem; }
+.confirmation { display:none; background:var(--white); border-left:4px solid var(--amber); padding:1.4rem 1.6rem; margin-top:1.5rem; border-radius:var(--radius); }
+.confirmation.show { display:block; }
+
+.admin-table { width:100%; border-collapse:collapse; margin-top:1.5rem; }
+.admin-table th, .admin-table td { text-align:left; padding:.75rem .6rem; border-bottom:1px solid var(--line); font-size:.92rem; }
+.admin-table th { color:var(--leaf-dim); font-weight:600; }
+.status-pill { padding:.2rem .6rem; border-radius:999px; font-size:.8rem; font-weight:600; }
+.status-pending { background:#FFF3D9; color:#8F6423; }
+.status-confirmed { background:#E4EFDE; color:#33513E; }
+.status-cancelled { background:#F3E1DC; color:#A5432B; }
+.row-actions button { margin-right:.4rem; font-size:.82rem; padding:.35rem .7rem; }
+.empty-state { padding:2rem 0; color:var(--leaf-dim); }
+
+footer { background:var(--leaf-dim); color:var(--parchment); padding:2rem 0; font-size:.9rem; }
+footer .wrap { display:flex; justify-content:space-between; flex-wrap:wrap; gap:1rem; }
+
+a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible { outline:2px solid var(--amber); outline-offset:2px; }
+@media (prefers-reduced-motion: reduce) { html{scroll-behavior:auto;} *{transition:none!important;} }
+@media (max-width:860px) { .hero .wrap, .two-col { grid-template-columns:1fr; } .field-report{transform:none;} .forecast-strip{grid-template-columns:1fr;} .site-nav nav a{margin-left:1rem;} }
+
+.view { display:none; }
+.view.active { display:block; }
+</style>
+</head>
+<body>
+
+<header class="site-nav">
+  <div class="wrap">
+    <a class="wordmark" data-view="home">Tokla <span>Tea Estate</span></a>
+    <nav>
+      <a data-view="home">The estate</a>
+      <a data-view="booking">Plan a visit</a>
+      <a data-view="admin">Bookings</a>
+    </nav>
+  </div>
+</header>
+
+<!-- ============================ HOME VIEW ============================ -->
+<div class="view active" id="view-home">
+  <section class="hero">
+    <div class="wrap">
+      <div class="hero-copy">
+        <div class="kicker">Mechinagar, Jhapa, Nepal</div>
+        <h1>Tea grown slow, on land we've worked for generations.</h1>
+        <p class="lede">Walk the rows before the leaf is even picked. Tokla Tea Estate opens its gardens for tours, tastings, and quiet mornings among the bushes — across our branches in the eastern hills.</p>
+        <div class="cta-row">
+          <a class="btn btn-primary" data-view="booking">Plan a visit</a>
+          <a class="btn btn-ghost" href="#estate">Read about the estate</a>
+        </div>
+      </div>
+      <div class="field-report">
+        <div id="field-report-body"><p class="fr-loading">Loading&hellip;</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="estate" class="section-alt">
+    <div class="wrap two-col">
+      <div>
+        <h2>What the estate is like in person</h2>
+        <p>Mornings here start in mist. By the time it lifts, the pickers are already moving through the rows, taking only the bud and the first two leaves — the part that becomes our orthodox tea.</p>
+        <p>A visit runs two to three hours: a walk through the gardens, a stop at the withering floor, and a tasting of whatever's fresh that week.</p>
+      </div>
+      <div>
+        <h3>Good to know before you come</h3>
+        <p class="form-note">Bring closed shoes — the garden paths are soft after rain. Groups larger than 15 should book at least three days ahead so we can arrange a second guide.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <h2>Our branches</h2>
+      <p class="lede">Each branch sits at a slightly different elevation, which changes the leaf — and the visit.</p>
+      <ul class="route-list">
+        <li><div><h3>Mechinagar Main Garden</h3><p>The original estate. Largest tour route, home to our tasting room.</p></div></li>
+        <li><div><h3>Kamal Basti Branch</h3><p>Smaller, quieter gardens — best for visitors who want fewer people around.</p></div></li>
+        <li><div><h3>Charpane Branch</h3><p>Highest elevation of the three, with a view over the plantation valley.</p></div></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="section-dark">
+    <div class="wrap">
+      <h2>Ready to see it yourself?</h2>
+      <p class="lede">Booking takes two minutes, and we'll tell you which day this week looks best for a visit.</p>
+      <a class="btn btn-primary" data-view="booking">Plan a visit</a>
+    </div>
+  </section>
+</div>
+
+<!-- ============================ BOOKING VIEW ============================ -->
+<div class="view" id="view-booking">
+  <section>
+    <div class="wrap two-col">
+      <div>
+        <h1 style="font-size:clamp(2rem,4vw,2.75rem);">Plan your visit</h1>
+        <p class="lede">Tell us when you'd like to come. We'll hold the slot and confirm by phone.</p>
+
+        <form id="booking-form" novalidate>
+          <div class="field">
+            <label for="name">Full name</label>
+            <input type="text" id="name" name="name" autocomplete="name">
+            <div class="field-error"></div>
+          </div>
+          <div class="field">
+            <label for="phone">Phone number</label>
+            <input type="tel" id="phone" name="phone" autocomplete="tel" placeholder="98XXXXXXXX">
+            <div class="field-error"></div>
+          </div>
+          <div class="field">
+            <label for="visitors">Group size</label>
+            <input type="number" id="visitors" name="visitors" min="1" max="40" value="1">
+            <div class="field-error"></div>
+          </div>
+          <div class="field">
+            <label for="date">Preferred date</label>
+            <input type="date" id="date" name="date">
+            <div class="field-error"></div>
+          </div>
+          <div class="field">
+            <label for="branch">Branch</label>
+            <select id="branch" name="branch">
+              <option value="">Choose a branch</option>
+              <option value="Mechinagar Main Garden">Mechinagar Main Garden</option>
+              <option value="Kamal Basti Branch">Kamal Basti Branch</option>
+              <option value="Charpane Branch">Charpane Branch</option>
+            </select>
+            <div class="field-error"></div>
+          </div>
+          <button type="submit" class="btn btn-primary">Request booking</button>
+        </form>
+
+        <div class="confirmation" id="confirmation">
+          <h3>Booking requested</h3>
+          <p id="confirmation-text"></p>
+        </div>
+      </div>
+
+      <div>
+        <h2 style="font-size:1.4rem;">Best days to visit this week</h2>
+        <p class="form-note">Based on the estate's current 3-day forecast.</p>
+        <div class="forecast-strip" id="forecast-strip"><p class="fr-loading">Loading forecast&hellip;</p></div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ============================ ADMIN VIEW ============================ -->
+<div class="view" id="view-admin">
+  <section>
+    <div class="wrap">
+      <h1 style="font-size:2rem;">Bookings</h1>
+      <p class="lede">Requests submitted through the visit form, stored on this device.</p>
+      <div id="table-wrap"></div>
+    </div>
+  </section>
+</div>
+
+<footer>
+  <div class="wrap">
+    <span>Tokla Tea Estate · Mechinagar, Jhapa</span>
+    <span>Open for visits Sunday–Friday</span>
+  </div>
+</footer>
+
+<script>
+/* ============================ VIEW ROUTER ============================ */
+function showView(name) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById('view-' + name).classList.add('active');
+  document.querySelectorAll('.site-nav nav a').forEach(a => a.classList.toggle('active', a.dataset.view === name));
+  window.scrollTo({ top: 0, behavior: 'instant' in window ? 'instant' : 'auto' });
+  if (name === 'booking') initForecast();
+  if (name === 'admin') renderAdminTable();
+}
+document.querySelectorAll('[data-view]').forEach(el => {
+  el.addEventListener('click', (e) => { e.preventDefault(); showView(el.dataset.view); });
+});
+
+/* ============================ WEATHER API ============================ */
+const ESTATE_LAT = 26.65, ESTATE_LON = 88.18;
+const CACHE_KEY = 'tokla_weather_cache_v1';
+const CACHE_TTL_MS = 30 * 60 * 1000;
+const WMO = {
+  0:{label:'Clear sky',mood:'clear'}, 1:{label:'Mostly clear',mood:'clear'},
+  2:{label:'Partly cloudy',mood:'fair'}, 3:{label:'Overcast',mood:'cloudy'},
+  45:{label:'Fog',mood:'poor'}, 48:{label:'Fog',mood:'poor'},
+  51:{label:'Light drizzle',mood:'wet'}, 53:{label:'Drizzle',mood:'wet'}, 55:{label:'Dense drizzle',mood:'wet'},
+  61:{label:'Light rain',mood:'wet'}, 63:{label:'Rain',mood:'wet'}, 65:{label:'Heavy rain',mood:'poor'},
+  80:{label:'Rain showers',mood:'wet'}, 81:{label:'Rain showers',mood:'wet'}, 82:{label:'Violent showers',mood:'poor'},
+  95:{label:'Thunderstorm',mood:'poor'}
+};
+function describeCode(code) { return WMO[code] || { label:'Mixed conditions', mood:'fair' }; }
+
+function readCache() {
+  try {
+    const raw = localStorage.getItem(CACHE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (Date.now() - parsed.timestamp > CACHE_TTL_MS) return null;
+    return parsed.data;
+  } catch (e) { return null; }
+}
+function writeCache(data) {
+  try { localStorage.setItem(CACHE_KEY, JSON.stringify({ data, timestamp: Date.now() })); } catch (e) {}
+}
+async function getEstateWeather({ forceRefresh = false } = {}) {
+  if (!forceRefresh) { const cached = readCache(); if (cached) return cached; }
+  const url = `https://api.open-meteo.com/v1/forecast?latitude=${ESTATE_LAT}&longitude=${ESTATE_LON}` +
+    `&current=temperature_2m,weather_code,wind_speed_10m` +
+    `&daily=temperature_2m_max,temperature_2m_min,weather_code` +
+    `&timezone=Asia%2FKathmandu&forecast_days=3`;
+  const res = await fetch(url);
+  if (!res.ok) throw new Error('Weather service unavailable');
+  const json = await res.json();
+  const data = {
+    current: { temp: Math.round(json.current.temperature_2m), code: json.current.weather_code, windSpeed: Math.round(json.current.wind_speed_10m) },
+    daily: json.daily.time.map((date, i) => ({ date, max: Math.round(json.daily.temperature_2m_max[i]), min: Math.round(json.daily.temperature_2m_min[i]), code: json.daily.weather_code[i] }))
+  };
+  writeCache(data);
+  return data;
+}
+
+/* ============================ HOME WEATHER CARD ============================ */
+function renderFieldReport(container, data) {
+  const cond = describeCode(data.current.code);
+  const today = new Date().toLocaleDateString('en-US', { weekday:'long', day:'numeric', month:'short' });
+  container.innerHTML = `
+    <div class="fr-date">${today}</div>
+    <div class="fr-temp"><span class="num">${data.current.temp}&deg;</span><span class="fr-cond">${cond.label}</span></div>
+    <div class="fr-meta">
+      <div><strong>${data.daily[0].max}&deg;</strong>High today</div>
+      <div><strong>${data.daily[0].min}&deg;</strong>Low tonight</div>
+      <div><strong>${data.current.windSpeed} km/h</strong>Wind</div>
+    </div>
+    <div class="fr-status">Mechinagar, Jhapa · updated just now</div>`;
+}
+async function initFieldReport() {
+  const container = document.getElementById('field-report-body');
+  container.innerHTML = '<p class="fr-loading">Reading the estate\u2019s weather station&hellip;</p>';
+  try { renderFieldReport(container, await getEstateWeather()); }
+  catch (e) { container.innerHTML = '<p class="fr-error">Weather is unavailable right now. Try refreshing the page.</p>'; }
+}
+
+/* ============================ FORECAST STRIP (booking) ============================ */
+function moodNote(mood) {
+  switch (mood) {
+    case 'clear': return 'Clear paths, good light for photos.';
+    case 'fair': return 'Comfortable walking weather.';
+    case 'cloudy': return 'Cool and overcast — fine for a visit.';
+    case 'wet': return 'Bring a light rain jacket.';
+    default: return 'Check back closer to the date.';
+  }
+}
+function renderForecast(container, daily) {
+  const moodRank = { clear:0, fair:1, cloudy:2, wet:3, poor:4 };
+  let bestIndex = 0;
+  daily.forEach((day, i) => {
+    if (moodRank[describeCode(day.code).mood] < moodRank[describeCode(daily[bestIndex].code).mood]) bestIndex = i;
+  });
+  container.innerHTML = daily.map((day, i) => {
+    const cond = describeCode(day.code);
+    const label = new Date(day.date + 'T00:00:00').toLocaleDateString('en-US', { weekday:'short', day:'numeric', month:'short' });
+    return `<div class="forecast-day ${i === bestIndex ? 'best' : ''}">
+      <div class="d-label">${label}</div>
+      <div class="d-temp">${day.max}&deg; / ${day.min}&deg;</div>
+      <div class="d-note">${cond.label} — ${moodNote(cond.mood)}</div>
+    </div>`;
+  }).join('');
+}
+let forecastLoaded = false;
+async function initForecast() {
+  if (forecastLoaded) return;
+  const strip = document.getElementById('forecast-strip');
+  try { renderForecast(strip, (await getEstateWeather()).daily); forecastLoaded = true; }
+  catch (e) { strip.innerHTML = '<p class="fr-error">Forecast unavailable right now.</p>'; }
+}
+
+/* ============================ VALIDATION ============================ */
+function showError(fieldEl, message) { fieldEl.classList.add('has-error'); const e = fieldEl.querySelector('.field-error'); if (e) e.textContent = message; }
+function clearError(fieldEl) { fieldEl.classList.remove('has-error'); }
+function isValidPhone(value) { return /^\+?\d{7,14}$/.test(value.replace(/[\s-]/g, '')); }
+function isFutureOrTodayDate(value) {
+  if (!value) return false;
+  const chosen = new Date(value + 'T00:00:00'); const today = new Date(); today.setHours(0,0,0,0);
+  return chosen >= today;
+}
+function validateBookingForm(form) {
+  let valid = true;
+  const name = form.querySelector('#name'), nameField = name.closest('.field');
+  if (name.value.trim().length < 2) { showError(nameField, 'Enter your full name.'); valid = false; } else clearError(nameField);
+
+  const phone = form.querySelector('#phone'), phoneField = phone.closest('.field');
+  if (!isValidPhone(phone.value)) { showError(phoneField, 'Enter a valid phone number.'); valid = false; } else clearError(phoneField);
+
+  const visitors = form.querySelector('#visitors'), visitorsField = visitors.closest('.field'), count = Number(visitors.value);
+  if (!count || count < 1 || count > 40) { showError(visitorsField, 'Enter a group size between 1 and 40.'); valid = false; } else clearError(visitorsField);
+
+  const date = form.querySelector('#date'), dateField = date.closest('.field');
+  if (!isFutureOrTodayDate(date.value)) { showError(dateField, 'Choose today or a future date.'); valid = false; } else clearError(dateField);
+
+  const branch = form.querySelector('#branch'), branchField = branch.closest('.field');
+  if (!branch.value) { showError(branchField, 'Select a branch to visit.'); valid = false; } else clearError(branchField);
+
+  return valid;
+}
+
+/* ============================ BOOKING SAVE ============================ */
+const BOOKINGS_KEY = 'tokla_bookings_v1';
+function loadBookings() { return JSON.parse(localStorage.getItem(BOOKINGS_KEY) || '[]').sort((a,b) => b.id - a.id); }
+function saveBookings(list) { localStorage.setItem(BOOKINGS_KEY, JSON.stringify(list)); }
+function saveBooking(booking) {
+  const existing = JSON.parse(localStorage.getItem(BOOKINGS_KEY) || '[]');
+  existing.push({ ...booking, id: Date.now(), status: 'pending' });
+  saveBookings(existing);
+}
+
+document.getElementById('booking-form').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const form = e.target;
+  if (!validateBookingForm(form)) return;
+  const booking = {
+    name: form.name.value.trim(), phone: form.phone.value.trim(),
+    visitors: Number(form.visitors.value), date: form.date.value, branch: form.branch.value
+  };
+  saveBooking(booking);
+  const confirmation = document.getElementById('confirmation');
+  document.getElementById('confirmation-text').textContent =
+    `Thanks, ${booking.name}. We've noted a visit for ${booking.visitors} ${booking.visitors === 1 ? 'person' : 'people'} at ${booking.branch} on ` +
+    `${new Date(booking.date + 'T00:00:00').toLocaleDateString('en-US', { weekday:'long', day:'numeric', month:'long' })}. We'll call ${booking.phone} to confirm.`;
+  confirmation.classList.add('show');
+  form.reset();
+});
+
+/* ============================ ADMIN TABLE ============================ */
+function setBookingStatus(id, status) {
+  saveBookings(loadBookings().map(b => b.id === id ? { ...b, status } : b));
+  renderAdminTable();
+}
+function renderAdminTable() {
+  const wrap = document.getElementById('table-wrap');
+  const bookings = loadBookings();
+  if (bookings.length === 0) {
+    wrap.innerHTML = '<p class="empty-state">No booking requests yet. They\u2019ll appear here once someone submits the visit form.</p>';
+    return;
+  }
+  wrap.innerHTML = `<table class="admin-table"><thead><tr><th>Name</th><th>Phone</th><th>Date</th><th>Branch</th><th>Group</th><th>Status</th><th></th></tr></thead><tbody>
+    ${bookings.map(b => `<tr>
+      <td>${b.name}</td><td>${b.phone}</td>
+      <td>${new Date(b.date + 'T00:00:00').toLocaleDateString('en-US', { day:'numeric', month:'short' })}</td>
+      <td>${b.branch}</td><td>${b.visitors}</td>
+      <td><span class="status-pill status-${b.status}">${b.status}</span></td>
+      <td class="row-actions">
+        <button class="btn btn-ghost" onclick="setBookingStatus(${b.id}, 'confirmed')">Confirm</button>
+        <button class="btn btn-ghost" onclick="setBookingStatus(${b.id}, 'cancelled')">Cancel</button>
+      </td>
+    </tr>`).join('')}
+  </tbody></table>`;
+}
+
+/* ============================ INIT ============================ */
+document.addEventListener('DOMContentLoaded', initFieldReport);
+</script>
+</body>
+</html>
